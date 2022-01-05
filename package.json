@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-calendar": "^3.5.0",
+    "react-calendar-timeline": "^0.27.0"
+  }
+}

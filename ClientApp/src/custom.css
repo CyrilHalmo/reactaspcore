@@ -12,3 +12,11 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+.baby-calendar {
+    margin: auto;
+}
+
+.rct-header-root {
+    background-color: rebeccapurple;
+}

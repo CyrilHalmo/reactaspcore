@@ -1,0 +1,16 @@
+﻿.react-calendar-timeline .rct-header-root {
+    background-color: rebeccapurple;
+}
+
+.react-calendar__tile--now {
+    background-color: rebeccapurple;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+    background-color: mediumpurple
+}
+
+.react-calendar__tile--active {
+    background-color: mediumpurple
+}
