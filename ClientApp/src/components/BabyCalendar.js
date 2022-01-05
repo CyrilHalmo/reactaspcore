@@ -12,8 +12,14 @@ export class BabyCalendar extends Component {
 
     constructor(props) {
         super(props);
+
+        this.zoomChanged = this.zoomChanged.bind(this);
+        this.calendarChanged = this.calendarChanged.bind(this);
         this.timelineChanged = this.timelineChanged.bind(this);
+
         this.state = {
+            timeStart: 0,
+            timeEnd: 0,
             value: new Date(),
             items: [
                 {
@@ -26,9 +32,18 @@ export class BabyCalendar extends Component {
         };
     }
 
+    zoomChanged(context) {
+        var a = (context.visibleTimeStart + context.visibleTimeEnd) / 2;
+        this.setState({ timeStart: a - 43200000, timeEnd: a + 43200000, value: new Date(a) });
+    }
+
+    calendarChanged(value) {
+        this.setState({ timeStart: value.getTime(), timeEnd: value.getTime() + 86400000, value: new Date(value) });
+    }
+
     timelineChanged(timeStart, timeEnd, updateCanvas) {
+        this.setState({ timeStart: timeStart, timeEnd: timeEnd, value: new Date((timeStart + timeEnd) / 2) });
         updateCanvas(timeStart, timeEnd);
-        this.setState({ value: new Date((timeStart + timeEnd) / 2) });
     }
 
     render() {
@@ -42,6 +57,7 @@ export class BabyCalendar extends Component {
                     <Calendar
                         className="baby-calendar"
                         value={this.state.value}
+                        onClickDay={this.calendarChanged}
                     />
                 </div>
                 <br />
@@ -57,6 +73,9 @@ export class BabyCalendar extends Component {
                         minZoom={86400000}
                         maxZoom={86400000}
                         onTimeChange={this.timelineChanged}
+                        visibleTimeStart={this.state.timeStart}
+                        visibleTimeEnd={this.state.timeEnd}
+                        onZoom={this.zoomChanged}
                     />
                 </div>
             </div>
