@@ -31,6 +31,7 @@ export class BabyCalendar extends Component {
             sleepItems: -1,
             isSleep: false,
             sleepText: "Start Sleep",
+            canStopSleep: true,
             timeStart: moment().add(-12, 'h'),
             timeEnd: moment().add(12, 'h'),
             value: new Date(),
@@ -40,12 +41,15 @@ export class BabyCalendar extends Component {
 
     calendarChanged(value) {
         var time = value.getTime();
+        var center = time + HALF_DAY_MILS;
         this.setState({
-            timelineCenter: time + HALF_DAY_MILS,
+            timelineCenter: center,
             timeStart: time,
             timeEnd: time + DAY_MILS,
             value: new Date(value)
         });
+        if (this.state.isSleep)
+            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
     }
 
     zoomChanged(context) {
@@ -56,6 +60,8 @@ export class BabyCalendar extends Component {
             timeEnd: center + HALF_DAY_MILS,
             value: new Date(center)
         });
+        if (this.state.isSleep)
+            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
     }
 
     timelineChanged(timeStart, timeEnd, updateCanvas) {
@@ -66,6 +72,8 @@ export class BabyCalendar extends Component {
             timeEnd: timeEnd,
             value: new Date(center)
         });
+        if (this.state.isSleep)
+            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
         updateCanvas(timeStart, timeEnd);
     }
 
@@ -122,8 +130,6 @@ export class BabyCalendar extends Component {
                         canMove={false}
                         canChangeGroup={false}
                         canResize={false}
-                        minZoom={DAY_MILS}
-                        maxZoom={DAY_MILS}
                         onTimeChange={this.timelineChanged}
                         visibleTimeStart={this.state.timeStart}
                         visibleTimeEnd={this.state.timeEnd}
@@ -138,8 +144,7 @@ export class BabyCalendar extends Component {
                 <br />
                 <div>
                     <p>{this.state.sleepText}...</p>
-                    <button type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
-                    <p>{this.state.sleepItems}</p>
+                    <button disabled={!this.state.canStopSleep} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
                 </div>
             </div>
         );
