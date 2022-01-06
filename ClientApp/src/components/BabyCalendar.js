@@ -122,8 +122,8 @@ export class BabyCalendar extends Component {
                         canMove={false}
                         canChangeGroup={false}
                         canResize={false}
-                        minZoom={86400000}
-                        maxZoom={86400000}
+                        minZoom={DAY_MILS}
+                        maxZoom={DAY_MILS}
                         onTimeChange={this.timelineChanged}
                         visibleTimeStart={this.state.timeStart}
                         visibleTimeEnd={this.state.timeEnd}
