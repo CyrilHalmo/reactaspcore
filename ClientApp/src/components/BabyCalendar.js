@@ -19,11 +19,11 @@ export class BabyCalendar extends Component {
         this.toggleSleep = this.toggleSleep.bind(this);
 
         this.state = {
-            sleepItems: 0,
+            sleepItems: -1,
             isSleep: false,
-            sleepButton: "Start Sleep",
-            timeStart: 0,
-            timeEnd: 0,
+            sleepText: "Start Sleep",
+            timeStart: moment().add(-12, 'h'),
+            timeEnd: moment().add(12, 'h'),
             value: new Date(),
             items: [
                 //{
@@ -60,16 +60,17 @@ export class BabyCalendar extends Component {
     }
 
     stopSleep() {
-        this.setState({ isSleep: false, sleepButton: "Start Sleep" });
+        this.setState({ isSleep: false, sleepText: "Start Sleep" });
+        this.state.items[this.state.sleepItems].end_time = (this.state.timeStart + this.state.timeEnd) / 2;
     }
 
     startSleep() {
-        this.setState({ sleepItems: this.state.sleepItems + 1, isSleep: true, sleepButton: "Stop Sleep" });
+        this.setState({ sleepItems: this.state.sleepItems + 1, isSleep: true, sleepText: "Stop Sleep" });
         this.state.items.push(
             {
                 id: this.state.sleepItems,
                 group: 1,
-                start_time: moment(),
+                start_time: (this.state.timeStart + this.state.timeEnd) / 2,
                 end_time: moment()
             }
         );
@@ -114,7 +115,8 @@ export class BabyCalendar extends Component {
                 </div>
                 <br />
                 <div>
-                    <button type="button" className="btn btn-primary" onClick={this.toggleSleep}>{this.state.sleepButton}</button>
+                    <p>{this.state.sleepText}...</p>
+                    <button type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment((this.state.timeStart + this.state.timeEnd) / 2).format('h:mm')}</button>
                     <p>{this.state.sleepItems}</p>
                 </div>
             </div>
