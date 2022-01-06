@@ -7,17 +7,26 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-calendar-timeline/lib/Timeline.css';
 import './BabyCalendar.css';
 
+const DAY_MILS = 86400000;
+const HALF_DAY_MILS = DAY_MILS / 2;
+
 export class BabyCalendar extends Component {
     static displayName = Calendar.name;
 
     constructor(props) {
         super(props);
+        this.bindFunctions();
+        this.initState();
+    }
 
+    bindFunctions() {
         this.zoomChanged = this.zoomChanged.bind(this);
         this.calendarChanged = this.calendarChanged.bind(this);
         this.timelineChanged = this.timelineChanged.bind(this);
         this.toggleSleep = this.toggleSleep.bind(this);
+    }
 
+    initState() {
         this.state = {
             sleepItems: -1,
             isSleep: false,
@@ -25,30 +34,38 @@ export class BabyCalendar extends Component {
             timeStart: moment().add(-12, 'h'),
             timeEnd: moment().add(12, 'h'),
             value: new Date(),
-            items: [
-                //{
-                //    id: 1,
-                //    group: 1,
-                //    start_time: moment(),
-                //    end_time: moment().add(1, 'hour')
-                //}
-            ]
+            items: []
         };
     }
 
-    zoomChanged(context) {
-        this.setState({ timelineCenter: (context.visibleTimeStart + context.visibleTimeEnd) / 2 });
-        this.setState({ timeStart: this.state.timelineCenter - 43200000, timeEnd: this.state.timelineCenter + 43200000, value: new Date(this.state.timelineCenter) });
+    calendarChanged(value) {
+        var time = value.getTime();
+        this.setState({
+            timelineCenter: time + HALF_DAY_MILS,
+            timeStart: time,
+            timeEnd: time + DAY_MILS,
+            value: new Date(value)
+        });
     }
 
-    calendarChanged(value) {
-        this.setState({ timelineCenter: (value.getTime() + value.getTime() + 86400000) / 2 });
-        this.setState({ timeStart: value.getTime(), timeEnd: value.getTime() + 86400000, value: new Date(value) });
+    zoomChanged(context) {
+        var center = (context.visibleTimeStart + context.visibleTimeEnd) / 2;
+        this.setState({
+            timelineCenter: center,
+            timeStart: center - HALF_DAY_MILS,
+            timeEnd: center + HALF_DAY_MILS,
+            value: new Date(center)
+        });
     }
 
     timelineChanged(timeStart, timeEnd, updateCanvas) {
-        this.setState({ timelineCenter: (timeStart + timeEnd) / 2 });
-        this.setState({ timeStart: timeStart, timeEnd: timeEnd, value: new Date((timeStart + timeEnd) / 2) });
+        var center = (timeStart + timeEnd) / 2;
+        this.setState({
+            timelineCenter: center,
+            timeStart: timeStart,
+            timeEnd: timeEnd,
+            value: new Date(center)
+        });
         updateCanvas(timeStart, timeEnd);
     }
 
@@ -78,7 +95,12 @@ export class BabyCalendar extends Component {
 
     render() {
 
-        let groups = [{ id: 1, title: 'Sleeping' }, { id: 2, title: 'Eating' }, { id: 3, title: 'Playing' }, { id: 4, title: 'Crying' }]
+        let groups = [
+            { id: 1, title: 'Sleeping' },
+            { id: 2, title: 'Eating' },
+            { id: 3, title: 'Playing' },
+            { id: 4, title: 'Crying' }
+        ]
 
         return (
             <div>
@@ -116,7 +138,7 @@ export class BabyCalendar extends Component {
                 <br />
                 <div>
                     <p>{this.state.sleepText}...</p>
-                    <button type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment((this.state.timeStart + this.state.timeEnd) / 2).format('h:mm')}</button>
+                    <button type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
                     <p>{this.state.sleepItems}</p>
                 </div>
             </div>
