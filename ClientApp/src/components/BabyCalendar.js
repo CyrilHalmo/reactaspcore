@@ -32,6 +32,7 @@ export class BabyCalendar extends Component {
             isSleep: false,
             sleepText: "Start Sleep",
             canStopSleep: true,
+            canStartSleep: true,
             timeStart: moment().add(-12, 'h'),
             timeEnd: moment().add(12, 'h'),
             value: new Date(),
@@ -63,6 +64,14 @@ export class BabyCalendar extends Component {
         });
         if (this.state.isSleep)
             this.setState({ canStopSleep: this.canStopSleep(center) });
+        else
+            this.setState({ canStartSleep: this.canStartSleep(center) });
+    }
+
+    canStartSleep(center) {
+        return !this.state.items.some(item => {
+            return item.start_time < center && item.end_time > center;
+        });
     }
 
     canStopSleep(center) {
@@ -146,7 +155,7 @@ export class BabyCalendar extends Component {
                 <br />
                 <div>
                     <p>{this.state.sleepText}...</p>
-                    <button disabled={!this.state.canStopSleep} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
+                    <button disabled={(this.state.isSleep && !this.state.canStopSleep) || (!this.state.isSleep && !this.state.canStartSleep)} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
                 </div>
             </div>
         );
