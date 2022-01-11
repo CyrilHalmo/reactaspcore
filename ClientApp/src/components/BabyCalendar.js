@@ -28,7 +28,7 @@ export class BabyCalendar extends Component {
 
     initState() {
         this.state = {
-            sleepItems: -1,
+            sleepItems: 0,
             isSleep: false,
             sleepText: "Start Sleep",
             canStopSleep: true,
@@ -49,7 +49,7 @@ export class BabyCalendar extends Component {
             value: new Date(value)
         });
         if (this.state.isSleep)
-            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
+            this.setState({ canStopSleep: this.canStopSleep() });
     }
 
     zoomChanged(context) {
@@ -61,7 +61,7 @@ export class BabyCalendar extends Component {
             value: new Date(center)
         });
         if (this.state.isSleep)
-            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
+            this.setState({ canStopSleep: this.canStopSleep(center) });
     }
 
     timelineChanged(timeStart, timeEnd, updateCanvas) {
@@ -73,8 +73,18 @@ export class BabyCalendar extends Component {
             value: new Date(center)
         });
         if (this.state.isSleep)
-            this.setState({ canStopSleep: this.state.items[this.state.sleepItems].start_time < center ? true : false });
+            this.setState({ canStopSleep: this.canStopSleep(center) });
         updateCanvas(timeStart, timeEnd);
+    }
+
+    canStopSleep(center) {
+        if (this.state.items.some((item, i) => {
+            console.log(item.id != this.state.sleepItems);
+            if (item.id != this.state.sleepItems && item.start_time < center && item.end_time > center)
+                return true;
+        }))
+            return false;
+        return this.state.items[this.state.sleepItems].start_time < center;
     }
 
     toggleSleep() {
@@ -85,18 +95,19 @@ export class BabyCalendar extends Component {
     }
 
     stopSleep() {
-        this.setState({ isSleep: false, sleepText: "Start Sleep" });
+        this.setState({ isSleep: false, sleepText: "Start Sleep", sleepItems: this.state.sleepItems + 1 });
         this.state.items[this.state.sleepItems].end_time = (this.state.timeStart + this.state.timeEnd) / 2;
     }
 
     startSleep() {
-        this.setState({ sleepItems: this.state.sleepItems + 1, isSleep: true, sleepText: "Stop Sleep" });
+        let startTime = (this.state.timeStart + this.state.timeEnd) / 2;
+        this.setState({ isSleep: true, sleepText: "Stop Sleep" });
         this.state.items.push(
             {
                 id: this.state.sleepItems,
                 group: 1,
-                start_time: (this.state.timeStart + this.state.timeEnd) / 2,
-                end_time: moment()
+                start_time: startTime,
+                end_time: startTime
             }
         );
     }
