@@ -16,7 +16,7 @@ export class BabyCalendar extends Component {
     constructor(props) {
         super(props);
         this.bindFunctions();
-        this.initState();
+        this.initializeState();
     }
 
     bindFunctions() {
@@ -26,7 +26,7 @@ export class BabyCalendar extends Component {
         this.toggleSleep = this.toggleSleep.bind(this);
     }
 
-    initState() {
+    initializeState() {
         this.state = {
             sleepItems: 0,
             isSleep: false,
@@ -40,32 +40,21 @@ export class BabyCalendar extends Component {
     }
 
     calendarChanged(value) {
-        var time = value.getTime();
-        var center = time + HALF_DAY_MILS;
-        this.setState({
-            timelineCenter: center,
-            timeStart: time,
-            timeEnd: time + DAY_MILS,
-            value: new Date(value)
-        });
-        if (this.state.isSleep)
-            this.setState({ canStopSleep: this.canStopSleep() });
+        this.updateState(value.getTime() + HALF_DAY_MILS);
     }
 
     zoomChanged(context) {
-        var center = (context.visibleTimeStart + context.visibleTimeEnd) / 2;
-        this.setState({
-            timelineCenter: center,
-            timeStart: center - HALF_DAY_MILS,
-            timeEnd: center + HALF_DAY_MILS,
-            value: new Date(center)
-        });
-        if (this.state.isSleep)
-            this.setState({ canStopSleep: this.canStopSleep(center) });
+        this.updateState((context.visibleTimeStart + context.visibleTimeEnd) / 2);
     }
 
     timelineChanged(timeStart, timeEnd, updateCanvas) {
-        var center = (timeStart + timeEnd) / 2;
+        this.updateState((timeStart + timeEnd) / 2);
+        updateCanvas(timeStart, timeEnd);
+    }
+
+    updateState(center) {
+        let timeStart = center - HALF_DAY_MILS;
+        let timeEnd = center + HALF_DAY_MILS;
         this.setState({
             timelineCenter: center,
             timeStart: timeStart,
@@ -74,17 +63,19 @@ export class BabyCalendar extends Component {
         });
         if (this.state.isSleep)
             this.setState({ canStopSleep: this.canStopSleep(center) });
-        updateCanvas(timeStart, timeEnd);
     }
 
     canStopSleep(center) {
-        if (this.state.items.some((item, i) => {
-            console.log(item.id != this.state.sleepItems);
-            if (item.id != this.state.sleepItems && item.start_time < center && item.end_time > center)
+        return !this.state.items.some(item => {
+            if (item.id != this.state.sleepItems) {
+                if (item.start_time > this.state.items[this.state.sleepItems].start_time && item.start_time < center)
+                    return true;
+            }
+            else if (item.start_time > center) {
                 return true;
-        }))
+            }
             return false;
-        return this.state.items[this.state.sleepItems].start_time < center;
+        });
     }
 
     toggleSleep() {
