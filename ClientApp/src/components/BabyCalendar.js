@@ -10,6 +10,14 @@ import './BabyCalendar.css';
 const DAY_MILS = 86400000;
 const HALF_DAY_MILS = DAY_MILS / 2;
 
+const State = {
+    Idle: 0,
+    Sleeping: 1,
+    Eating: 2,
+    Playing: 3,
+    Crying: 4
+};
+
 export class BabyCalendar extends Component {
     static displayName = Calendar.name;
 
@@ -29,7 +37,7 @@ export class BabyCalendar extends Component {
     initializeState() {
         this.state = {
             sleepItems: 0,
-            isSleep: false,
+            babyState: State.Idle,
             sleepText: "Start Sleep",
             canStopSleep: true,
             canStartSleep: true,
@@ -62,7 +70,7 @@ export class BabyCalendar extends Component {
             timeEnd: timeEnd,
             value: new Date(center)
         });
-        if (this.state.isSleep)
+        if (this.state.babyState == State.Sleeping)
             this.setState({ canStopSleep: this.canStopSleep(center) });
         else
             this.setState({ canStartSleep: this.canStartSleep(center) });
@@ -88,20 +96,20 @@ export class BabyCalendar extends Component {
     }
 
     toggleSleep() {
-        if (this.state.isSleep)
+        if (this.state.babyState == State.Sleeping)
             this.stopSleep();
         else
             this.startSleep();
     }
 
     stopSleep() {
-        this.setState({ isSleep: false, sleepText: "Start Sleep", sleepItems: this.state.sleepItems + 1 });
+        this.setState({ babyState: State.Idle, sleepText: "Start Sleep", sleepItems: this.state.sleepItems + 1 });
         this.state.items[this.state.sleepItems].end_time = (this.state.timeStart + this.state.timeEnd) / 2;
     }
 
     startSleep() {
         let startTime = (this.state.timeStart + this.state.timeEnd) / 2;
-        this.setState({ isSleep: true, sleepText: "Stop Sleep" });
+        this.setState({ babyState: State.Sleeping, sleepText: "Stop Sleep" });
         this.state.items.push(
             {
                 id: this.state.sleepItems,
@@ -119,7 +127,7 @@ export class BabyCalendar extends Component {
             { id: 2, title: 'Eating' },
             { id: 3, title: 'Playing' },
             { id: 4, title: 'Crying' }
-        ]
+        ];
 
         return (
             <div>
@@ -155,7 +163,7 @@ export class BabyCalendar extends Component {
                 <br />
                 <div>
                     <p>{this.state.sleepText}...</p>
-                    <button disabled={(this.state.isSleep && !this.state.canStopSleep) || (!this.state.isSleep && !this.state.canStartSleep)} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
+                    <button disabled={(this.state.babyState == State.Sleeping && !this.state.canStopSleep) || (!this.state.babyState == State.Sleeping && !this.state.canStartSleep)} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
                 </div>
             </div>
         );
