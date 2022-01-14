@@ -41,8 +41,11 @@ export class BabyCalendar extends Component {
             sleepText: "Start Sleep",
             canStopSleep: true,
             canStartSleep: true,
+            hideCursorSleepButton: false,
+            hideNowSleepButton: false,
             timeStart: moment().add(-12, 'h'),
             timeEnd: moment().add(12, 'h'),
+            timelineCenter: moment(),
             value: new Date(),
             items: []
         };
@@ -68,12 +71,10 @@ export class BabyCalendar extends Component {
             timelineCenter: center,
             timeStart: timeStart,
             timeEnd: timeEnd,
-            value: new Date(center)
+            value: new Date(center),
+            hideCursorSleepButton: (this.state.babyState == State.Sleeping && !this.canStopSleep(center)) || (!this.state.babyState == State.Sleeping && !this.canStartSleep(center)),
+            hideNowSleepButton: (this.state.babyState == State.Sleeping && !this.canStopSleep(moment())) || (!this.state.babyState == State.Sleeping && !this.canStartSleep(moment()))
         });
-        if (this.state.babyState == State.Sleeping)
-            this.setState({ canStopSleep: this.canStopSleep(center) });
-        else
-            this.setState({ canStartSleep: this.canStartSleep(center) });
     }
 
     canStartSleep(center) {
@@ -100,16 +101,19 @@ export class BabyCalendar extends Component {
             this.stopSleep();
         else
             this.startSleep();
+        this.updateState(this.state.timelineCenter);
     }
 
     stopSleep() {
-        this.setState({ babyState: State.Idle, sleepText: "Start Sleep", sleepItems: this.state.sleepItems + 1 });
-        this.state.items[this.state.sleepItems].end_time = (this.state.timeStart + this.state.timeEnd) / 2;
+        this.state.babyState = State.Idle;
+        this.setState({ sleepText: "Start Sleep", sleepItems: this.state.sleepItems + 1 });
+        this.state.items[this.state.sleepItems].end_time = this.state.timelineCenter;
     }
 
     startSleep() {
-        let startTime = (this.state.timeStart + this.state.timeEnd) / 2;
-        this.setState({ babyState: State.Sleeping, sleepText: "Stop Sleep" });
+        let startTime = this.state.timelineCenter;
+        this.state.babyState = State.Sleeping;
+        this.setState({ sleepText: "Stop Sleep" });
         this.state.items.push(
             {
                 id: this.state.sleepItems,
@@ -163,7 +167,8 @@ export class BabyCalendar extends Component {
                 <br />
                 <div>
                     <p>{this.state.sleepText}...</p>
-                    <button disabled={(this.state.babyState == State.Sleeping && !this.state.canStopSleep) || (!this.state.babyState == State.Sleeping && !this.state.canStartSleep)} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
+                    <button disabled={this.state.hideCursorSleepButton} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...at Cursor {moment(this.state.timelineCenter).format('h:mm')}</button>
+                    {/*<button disabled={this.state.hideNowSleepButton} type="button" className="btn btn-primary" onClick={this.toggleSleep}>...Now {moment().format('h:mm')}</button>*/}
                 </div>
             </div>
         );
